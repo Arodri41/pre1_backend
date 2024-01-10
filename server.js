@@ -1,10 +1,29 @@
-import express from 'express';
+import express from "express";
+import morgan from "morgan";
+import { engine } from "express-handlebars";
 
+import router from "./Src/routers/index.router.js";
+import errorHandler from "./Src/middlewares/errorHandler.mid.js";
+import pathHandler from "./Src/middlewares/pathHandler.mid.js";
+import __dirname from "./utils.js";
 
-const server = express()
-
+const server = express();
 const PORT = 8080;
+const ready = () => console.log("server ready on port " + PORT);
+server.listen(PORT, ready);
 
-const Ready = ()=> console.log("server ready on port" + PORT);
+//templates
+server.engine("handlebars",engine())
+server.set("view engine", "handlebars")
+server.set("views", __dirname+"/src/views")
 
-server.listen(PORT,Ready);
+//middlewares
+server.use(express.json());
+server.use(express.urlencoded({ extended: true }));
+server.use(express.static(__dirname + "/public"));
+server.use(morgan("dev"));
+
+//routers
+server.use("/", router);
+server.use(errorHandler);
+server.use(pathHandler);
